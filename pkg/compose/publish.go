@@ -416,11 +416,14 @@ func (s *composeService) checkForBindMount(project *types.Project) map[string][]
 			if volume.Type == types.VolumeTypeVolume && volume.Source != "" {
 				if topLevel, ok := project.Volumes[volume.Source]; ok {
 					if isDriverOptsBind(topLevel) {
-						device := topLevel.DriverOpts["device"]
+						device := strings.TrimSpace(topLevel.DriverOpts["device"])
 						bindMounts = append(bindMounts, types.ServiceVolumeConfig{
-							Type:   types.VolumeTypeBind,
-							Source: device,
-							Target: volume.Target,
+							Type:        types.VolumeTypeBind,
+							Source:      device,
+							Target:      volume.Target,
+							ReadOnly:    volume.ReadOnly,
+							Consistency: volume.Consistency,
+							Bind:        volume.Bind,
 						})
 					}
 				}
@@ -441,8 +444,8 @@ func isDriverOptsBind(v types.VolumeConfig) bool {
 	if len(opts) == 0 {
 		return false
 	}
-	_, hasDevice := opts["device"]
-	if !hasDevice {
+	device := strings.TrimSpace(opts["device"])
+	if device == "" {
 		return false
 	}
 	for _, opt := range strings.Split(opts["o"], ",") {
