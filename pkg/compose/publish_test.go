@@ -254,6 +254,14 @@ func Test_isDriverOptsBind(t *testing.T) {
 			expected: false,
 		},
 		{
+			name: "empty device value",
+			volume: types.VolumeConfig{
+				Driver:     "local",
+				DriverOpts: map[string]string{"o": "bind", "device": "   "},
+			},
+			expected: false,
+		},
+		{
 			name: "empty driver_opts",
 			volume: types.VolumeConfig{
 				Driver: "local",
